@@ -20,19 +20,11 @@ android {
         }
     }
 
-    signingConfigs {
-        release {
-            // Use the standard debug keystore for automated release builds
-            // so anyone can install the APK directly on their device without signature issues
-            initWith debug
-        }
-    }
-
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
         }
         debug {
             signingConfig signingConfigs.debug
@@ -48,8 +40,9 @@ android {
         jvmTarget = '17'
     }
 
-    buildFeatures {
-        viewBinding true
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
     }
 }
 

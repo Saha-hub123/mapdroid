@@ -9,7 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.android.material.chip.Chip
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.maplibre.android.MapLibre
 import org.maplibre.android.annotations.Marker
@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var tvCurrentStyle: TextView
     private lateinit var tvCoordinates: TextView
-    private lateinit var chipStyle: Chip
+    private lateinit var btnStyle: MaterialButton
     private lateinit var fabZoomIn: FloatingActionButton
     private lateinit var fabZoomOut: FloatingActionButton
     private lateinit var fabMyLocation: FloatingActionButton
@@ -51,23 +51,20 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val PERMISSION_REQUEST_LOCATION = 1001
-        private val INDONESIA_CENTER = LatLng(-6.2088, 106.8456) // Jakarta, Indonesia
+        private val INDONESIA_CENTER = LatLng(-6.2088, 106.8456)
         private const val DEFAULT_ZOOM = 9.0
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Initialize MapLibre before layout inflation
         MapLibre.getInstance(this)
-
         setContentView(R.layout.activity_main)
 
-        // Initialize views
         mapView = findViewById(R.id.mapView)
         tvCurrentStyle = findViewById(R.id.tvCurrentStyle)
         tvCoordinates = findViewById(R.id.tvCoordinates)
-        chipStyle = findViewById(R.id.chipStyle)
+        btnStyle = findViewById(R.id.btnStyle)
         fabZoomIn = findViewById(R.id.fabZoomIn)
         fabZoomOut = findViewById(R.id.fabZoomOut)
         fabMyLocation = findViewById(R.id.fabMyLocation)
@@ -76,7 +73,6 @@ class MainActivity : AppCompatActivity() {
 
         setupControls()
 
-        // Asynchronously load the map
         mapView.getMapAsync { map ->
             mapLibreMap = map
             setupMap()
@@ -96,7 +92,7 @@ class MainActivity : AppCompatActivity() {
             enableUserLocation()
         }
 
-        chipStyle.setOnClickListener {
+        btnStyle.setOnClickListener {
             switchMapStyle()
         }
     }
@@ -105,14 +101,12 @@ class MainActivity : AppCompatActivity() {
         val currentStyle = availableStyles[currentStyleIndex]
         loadStyle(currentStyle)
 
-        // Move camera to initial position
         val initialPosition = CameraPosition.Builder()
             .target(INDONESIA_CENTER)
             .zoom(DEFAULT_ZOOM)
             .build()
         mapLibreMap?.cameraPosition = initialPosition
 
-        // Setup map click listener to place markers
         mapLibreMap?.addOnMapClickListener { point ->
             onMapClicked(point)
             true
@@ -122,7 +116,6 @@ class MainActivity : AppCompatActivity() {
     private fun loadStyle(styleItem: StyleItem) {
         tvCurrentStyle.text = "Style: ${styleItem.name}"
         mapLibreMap?.setStyle(Style.Builder().fromUri(styleItem.url)) { style ->
-            // Re-enable location if permission already granted
             if (hasLocationPermission()) {
                 activateLocation(style)
             }
@@ -159,7 +152,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun enableUserLocation() {
         if (hasLocationPermission()) {
-            mapLibreMap?.style?.let { style ->
+            mapLibreMap?.getStyle { style ->
                 activateLocation(style)
             }
         } else {
@@ -206,14 +199,13 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSION_REQUEST_LOCATION) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                mapLibreMap?.style?.let { activateLocation(it) }
+                mapLibreMap?.getStyle { activateLocation(it) }
             } else {
                 Toast.makeText(this, getString(R.string.permission_required), Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    // Lifecycle methods forwarding to MapView
     override fun onStart() {
         super.onStart()
         mapView.onStart()

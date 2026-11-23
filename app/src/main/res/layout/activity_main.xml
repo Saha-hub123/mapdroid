@@ -61,15 +61,16 @@
                     android:textSize="12sp" />
             </LinearLayout>
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipStyle"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/change_layer"
-                app:chipIcon="@drawable/ic_layers"
-                app:chipBackgroundColor="@color/primary_light"
-                android:textColor="@color/primary_dark"
-                app:chipStrokeWidth="0dp" />
+                app:icon="@drawable/ic_layers"
+                app:iconSize="16dp"
+                android:textSize="12sp"
+                app:cornerRadius="12dp"
+                style="@style/Widget.Material3.Button.TonalButton" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 

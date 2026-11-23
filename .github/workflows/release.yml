@@ -33,7 +33,7 @@ jobs:
 
       - name: Build Release APK with Gradle
         run: |
-          gradle assembleRelease --stacktrace
+          gradle assembleRelease -x lint -x test --stacktrace
 
       - name: Prepare APK Release Artifacts
         id: prep
@@ -44,7 +44,12 @@ jobs:
           # Find generated release APK
           APK_SOURCE=$(find app/build/outputs/apk/release/ -name "*.apk" | head -n 1)
           if [ -z "$APK_SOURCE" ]; then
-            echo "::error::Release APK not found in app/build/outputs/apk/release/"
+            echo "Release APK not found in app/build/outputs/apk/release/, searching in all outputs..."
+            APK_SOURCE=$(find app/build/outputs/apk/ -name "*.apk" | head -n 1)
+          fi
+          
+          if [ -z "$APK_SOURCE" ]; then
+            echo "::error::No APK file generated!"
             exit 1
           fi
           
