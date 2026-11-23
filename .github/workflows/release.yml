@@ -1,0 +1,83 @@
+name: Auto Tag and Release Mapdroid APK
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build & Publish Release APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.5'
+
+      - name: Build Release APK with Gradle
+        run: |
+          gradle assembleRelease --stacktrace
+
+      - name: Prepare APK Release Artifacts
+        id: prep
+        run: |
+          TAG="v1.0.${{ github.run_number }}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          
+          # Find generated release APK
+          APK_SOURCE=$(find app/build/outputs/apk/release/ -name "*.apk" | head -n 1)
+          if [ -z "$APK_SOURCE" ]; then
+            echo "::error::Release APK not found in app/build/outputs/apk/release/"
+            exit 1
+          fi
+          
+          echo "Found APK: $APK_SOURCE"
+          cp "$APK_SOURCE" mapdroid.apk
+          cp "$APK_SOURCE" "mapdroid-${TAG}.apk"
+          ls -lh mapdroid.apk
+
+      - name: Create GitHub Release and Upload APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.prep.outputs.tag }}
+          name: "Mapdroid Release ${{ steps.prep.outputs.tag }}"
+          body: |
+            ## 📱 Mapdroid - MapLibre Android Application
+            
+            Versi rilis otomatis: **${{ steps.prep.outputs.tag }}**
+            Komit: `${{ github.sha }}`
+            
+            ### ⬇️ Unduh Berkas APK Langsung
+            * 🔗 **[Unduh mapdroid.apk (Versi Terbaru)](https://github.com/${{ github.repository }}/releases/latest/download/mapdroid.apk)**
+            * 📦 **[Unduh mapdroid-${{ steps.prep.outputs.tag }}.apk](https://github.com/${{ github.repository }}/releases/download/${{ steps.prep.outputs.tag }}/mapdroid-${{ steps.prep.outputs.tag }}.apk)**
+            
+            ### 📋 Panduan Instalasi di HP Android
+            1. Unduh berkas `mapdroid.apk` di atas.
+            2. Buka berkas APK yang telah diunduh.
+            3. Jika muncul peringatan keamanan instalasi, aktifkan **"Izinkan instalasi aplikasi dari sumber tidak dikenal" (Allow from unknown sources)**.
+            4. Klik **Install** dan tunggu hingga selesai.
+            5. Buka **Mapdroid** dan nikmati penjelajahan peta dengan MapLibre!
+          draft: false
+          prerelease: false
+          files: |
+            mapdroid.apk
+            mapdroid-${{ steps.prep.outputs.tag }}.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

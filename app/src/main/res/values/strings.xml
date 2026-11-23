@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Mapdroid</string>
+    <string name="style_demo">MapLibre Demo</string>
+    <string name="style_bright">OSM Bright</string>
+    <string name="style_liberty">OSM Liberty</string>
+    <string name="style_positron">OSM Positron</string>
+    <string name="zoom_in">Zoom In</string>
+    <string name="zoom_out">Zoom Out</string>
+    <string name="my_location">Lokasi Saya</string>
+    <string name="change_layer">Ganti Layer</string>
+    <string name="coordinate_title">Koordinat Lokasi</string>
+    <string name="click_to_pin">Ketuk peta untuk menandai titik koordinat</string>
+    <string name="permission_required">Izin lokasi dibutuhkan untuk menampilkan posisi Anda di peta</string>
+</resources>
